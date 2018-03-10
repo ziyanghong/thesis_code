@@ -1,6 +1,10 @@
 // C++ library
 #include <iostream>
+#include <vector>
 #include <string>
+#include <sstream>
+#include <fstream>
+#include <stdlib.h> // atoi header file
 using namespace std;
 
 // OpenCV library
@@ -22,11 +26,14 @@ const double camera_cy = 253.5;
 const double camera_fx = 518.0;
 const double camera_fy = 519.0;
 
+vector<vector<int>> GetTextDetection(const string &text_detection_path);
+
 // Main 
 int main( int argc, char** argv )
 {
-    string rgb_s = "./data/rgb.png";
-    string depth_s = "./data/depth.png";
+    string rgb_path = "/data/rgb.png";
+    string depth_path = "/data/depth.png";
+    string text_detection_txt = "/frame.txt";
 
     cv::Mat rgb, depth;
     rgb = cv::imread( rgb_s );
@@ -70,4 +77,29 @@ int main( int argc, char** argv )
     cloud->points.clear();
     cout<<"Point cloud saved."<<endl;
     return 0;
+}
+
+vector<vector<int> > GetTextDetection(const string &text_detection_txt)
+{
+    vector<vector<int> > bboxes;
+    ifstream text_dtection;
+    cout<<"text_detection_txt.c_str() is "<<text_detection_txt.c_str()<<endl;
+    text_dtection.open(text_detection_txt.c_str());
+    string s;
+    while(getline(text_dtection,s)){
+        vector<int> box;
+        stringstream ss;
+        ss<<s;
+        for(int j = 0; j < 8; j++)
+        {
+            string substr;
+            getline(ss, substr, ',');
+            box.push_back(atoi(substr.c_str()));
+            cout<<box[j]<<",";
+        }
+        cout<<endl;
+        bboxes.push_back(box);
+        box.erase(box.begin(), box.end()); // Make sure clear the vector every iteration.
+    }
+    return bboxes;
 }
